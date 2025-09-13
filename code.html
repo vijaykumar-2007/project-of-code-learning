@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeLearn Pro - Interactive Programming Education</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .code-editor {
+            background: #fefefe;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .code-editor:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .floating-card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .syntax-highlight {
+            color: #1e40af;
+        }
+        
+        .error-highlight {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #ef4444;
+        }
+        
+        .success-highlight {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 3px solid #22c55e;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">C</span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-800">CodeLearn Pro</h1>
+                </div>
+                <nav class="flex space-x-6">
+                    <button class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Dashboard</button>
+                    <button class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Tutorials</button>
+                    <button class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Exercises</button>
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Profile</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Code Editor Section -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Tutorial Header -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 slide-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-slate-800">Interactive Tutorial: Python Functions</h2>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Beginner</span>
+                            <span class="text-slate-500 text-sm">Step 3 of 8</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 mb-4">Learn how to create and use functions in Python. Functions help you organize your code and make it reusable.</p>
+                    <div class="w-full bg-slate-200 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 37.5%"></div>
+                    </div>
+                </div>
+
+                <!-- Code Editor -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex items-center justify-between">
+                        <h3 class="font-medium text-slate-800">Code Editor</h3>
+                        <div class="flex space-x-2">
+                            <button id="runCode" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                                ▶ Run Code
+                            </button>
+                            <button id="analyzeCode" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                                🔍 Analyze
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <textarea id="codeEditor" class="w-full h-64 code-editor rounded-lg p-4 font-mono text-sm resize-none focus:outline-none" placeholder="# Write your Python code here...
+def greet(name):
+    return f'Hello, {name}!'
+
+# Call the function
+message = greet('World')
+print(message)"></textarea>
+                    </div>
+                </div>
+
+                <!-- Output Console -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-200">
+                        <h3 class="font-medium text-slate-800">Console Output</h3>
+                    </div>
+                    <div id="console" class="p-6 bg-slate-900 text-green-400 font-mono text-sm min-h-32">
+                        <div class="text-slate-400">Ready to run your code...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Code Analysis Panel -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4 flex items-center">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                        Code Analysis
+                    </h3>
+                    <div id="analysisResults" class="space-y-3">
+                        <div class="text-slate-500 text-sm">Run analysis to see code insights...</div>
+                    </div>
+                </div>
+
+                <!-- Error Detection -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4 flex items-center">
+                        <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                        Error Detection
+                    </h3>
+                    <div id="errorResults" class="space-y-3">
+                        <div class="text-slate-500 text-sm">No errors detected</div>
+                    </div>
+                </div>
+
+                <!-- Debugging Suggestions -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4 flex items-center">
+                        <span class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                        Debug Helper
+                    </h3>
+                    <div id="debugSuggestions" class="space-y-3">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="text-blue-800 font-medium text-sm">💡 Tip</div>
+                            <div class="text-blue-700 text-sm mt-1">Use descriptive variable names to make your code more readable.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise Generator -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4 flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                        Practice Exercises
+                    </h3>
+                    <button id="generateExercise" class="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium mb-3">
+                        Generate New Exercise
+                    </button>
+                    <div id="currentExercise" class="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                        <div class="text-purple-800 font-medium text-sm mb-2">Current Challenge:</div>
+                        <div class="text-purple-700 text-sm">Create a function that takes two numbers and returns their sum.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutorial Navigation -->
+        <div class="mt-8 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div class="flex items-center justify-between">
+                <button class="flex items-center space-x-2 text-slate-600 hover:text-blue-600 transition-colors">
+                    <span>←</span>
+                    <span>Previous: Variables</span>
+                </button>
+                <div class="flex space-x-2">
+                    <div class="w-8 h-2 bg-blue-600 rounded-full"></div>
+                    <div class="w-8 h-2 bg-blue-600 rounded-full"></div>
+                    <div class="w-8 h-2 bg-blue-600 rounded-full"></div>
+                    <div class="w-8 h-2 bg-slate-300 rounded-full"></div>
+                    <div class="w-8 h-2 bg-slate-300 rounded-full"></div>
+                    <div class="w-8 h-2 bg-slate-300 rounded-full"></div>
+                    <div class="w-8 h-2 bg-slate-300 rounded-full"></div>
+                    <div class="w-8 h-2 bg-slate-300 rounded-full"></div>
+                </div>
+                <button class="flex items-center space-x-2 text-slate-600 hover:text-blue-600 transition-colors">
+                    <span>Next: Loops</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Code analysis and error detection system
+        class CodeAnalyzer {
+            constructor() {
+                this.keywords = ['def', 'class', 'if', 'else', 'elif', 'for', 'while', 'try', 'except', 'import', 'from', 'return'];
+                this.commonErrors = [
+                    { pattern: /print\s*\(.*\)(?!\s*$)/, message: 'Missing newline after print statement' },
+                    { pattern: /def\s+\w+\([^)]*\)(?!\s*:)/, message: 'Missing colon after function definition' },
+                    { pattern: /if\s+.*(?!\s*:)$/, message: 'Missing colon after if statement' },
+                    { pattern: /^\s*\w+\s*=\s*$/, message: 'Incomplete assignment statement' }
+                ];
+            }
+
+            analyzeCode(code) {
+                const lines = code.split('\n');
+                const analysis = {
+                    lineCount: lines.length,
+                    functions: [],
+                    variables: [],
+                    complexity: 'Low',
+                    suggestions: []
+                };
+
+                // Find functions
+                lines.forEach((line, index) => {
+                    const funcMatch = line.match(/def\s+(\w+)\s*\(/);
+                    if (funcMatch) {
+                        analysis.functions.push({
+                            name: funcMatch[1],
+                            line: index + 1
+                        });
+                    }
+
+                    // Find variables
+                    const varMatch = line.match(/^\s*(\w+)\s*=/);
+                    if (varMatch && !this.keywords.includes(varMatch[1])) {
+                        analysis.variables.push({
+                            name: varMatch[1],
+                            line: index + 1
+                        });
+                    }
+                });
+
+                // Calculate complexity
+                const complexityIndicators = code.match(/(if|for|while|try|def|class)/g) || [];
+                if (complexityIndicators.length > 5) analysis.complexity = 'High';
+                else if (complexityIndicators.length > 2) analysis.complexity = 'Medium';
+
+                // Generate suggestions
+                if (analysis.functions.length === 0) {
+                    analysis.suggestions.push('Consider breaking your code into functions for better organization');
+                }
+                if (code.length > 200 && analysis.functions.length < 2) {
+                    analysis.suggestions.push('Your code is getting long - try creating more functions');
+                }
+
+                return analysis;
+            }
+
+            detectErrors(code) {
+                const errors = [];
+                const lines = code.split('\n');
+
+                lines.forEach((line, index) => {
+                    this.commonErrors.forEach(error => {
+                        if (error.pattern.test(line)) {
+                            errors.push({
+                                line: index + 1,
+                                message: error.message,
+                                code: line.trim()
+                            });
+                        }
+                    });
+
+                    // Check for indentation errors
+                    if (line.match(/^\s*(def|if|for|while|try|class)/) && !line.endsWith(':')) {
+                        errors.push({
+                            line: index + 1,
+                            message: 'Missing colon at end of statement',
+                            code: line.trim()
+                        });
+                    }
+                });
+
+                return errors;
+            }
+
+            generateDebuggingSuggestions(code, errors) {
+                const suggestions = [];
+
+                if (errors.length > 0) {
+                    suggestions.push({
+                        type: 'error',
+                        title: 'Fix Syntax Errors',
+                        message: 'Start by fixing the syntax errors highlighted above'
+                    });
+                }
+
+                if (code.includes('print(') && !code.includes('def ')) {
+                    suggestions.push({
+                        type: 'improvement',
+                        title: 'Use Functions',
+                        message: 'Consider wrapping your print statements in a function'
+                    });
+                }
+
+                if (code.split('\n').length > 10) {
+                    suggestions.push({
+                        type: 'organization',
+                        title: 'Code Organization',
+                        message: 'Break down long code into smaller, focused functions'
+                    });
+                }
+
+                return suggestions;
+            }
+        }
+
+        // Exercise generator
+        class ExerciseGenerator {
+            constructor() {
+                this.exercises = [
+                    {
+                        title: 'Basic Function',
+                        description: 'Create a function that takes two numbers and returns their sum.',
+                        difficulty: 'Easy',
+                        hint: 'Use the def keyword to define a function'
+                    },
+                    {
+                        title: 'String Manipulation',
+                        description: 'Write a function that takes a string and returns it in uppercase.',
+                        difficulty: 'Easy',
+                        hint: 'Use the .upper() method on strings'
+                    },
+                    {
+                        title: 'List Processing',
+                        description: 'Create a function that finds the maximum number in a list.',
+                        difficulty: 'Medium',
+                        hint: 'You can use the max() function or write a loop'
+                    },
+                    {
+                        title: 'Conditional Logic',
+                        description: 'Write a function that checks if a number is even or odd.',
+                        difficulty: 'Easy',
+                        hint: 'Use the modulo operator (%) to check remainders'
+                    },
+                    {
+                        title: 'Loop Practice',
+                        description: 'Create a function that prints numbers from 1 to n.',
+                        difficulty: 'Medium',
+                        hint: 'Use a for loop with range()'
+                    }
+                ];
+            }
+
+            generateRandomExercise() {
+                const randomIndex = Math.floor(Math.random() * this.exercises.length);
+                return this.exercises[randomIndex];
+            }
+        }
+
+        // Initialize components
+        const analyzer = new CodeAnalyzer();
+        const exerciseGenerator = new ExerciseGenerator();
+
+        // DOM elements
+        const codeEditor = document.getElementById('codeEditor');
+        const console = document.getElementById('console');
+        const analysisResults = document.getElementById('analysisResults');
+        const errorResults = document.getElementById('errorResults');
+        const debugSuggestions = document.getElementById('debugSuggestions');
+        const currentExercise = document.getElementById('currentExercise');
+
+        // Set initial code
+        codeEditor.value = `# Write your Python code here...
+def greet(name):
+    return f'Hello, {name}!'
+
+# Call the function
+message = greet('World')
+print(message)`;
+
+        // Event listeners
+        document.getElementById('runCode').addEventListener('click', () => {
+            const code = codeEditor.value;
+            
+            // Simulate code execution
+            console.innerHTML = '<div class="text-green-400">Running code...</div>';
+            
+            setTimeout(() => {
+                if (code.includes('print(')) {
+                    const output = code.match(/print\(['"`]([^'"`]*?)['"`]\)/g);
+                    if (output) {
+                        console.innerHTML = output.map(p => {
+                            const match = p.match(/print\(['"`]([^'"`]*?)['"`]\)/);
+                            return `<div class="text-green-400">${match ? match[1] : 'Hello, World!'}</div>`;
+                        }).join('');
+                    } else {
+                        console.innerHTML = '<div class="text-green-400">Hello, World!</div>';
+                    }
+                } else {
+                    console.innerHTML = '<div class="text-yellow-400">Code executed successfully (no output)</div>';
+                }
+            }, 1000);
+        });
+
+        document.getElementById('analyzeCode').addEventListener('click', () => {
+            const code = codeEditor.value;
+            const analysis = analyzer.analyzeCode(code);
+            const errors = analyzer.detectErrors(code);
+            const suggestions = analyzer.generateDebuggingSuggestions(code, errors);
+
+            // Update analysis results
+            analysisResults.innerHTML = `
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600">Lines of code:</span>
+                        <span class="font-medium">${analysis.lineCount}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600">Functions:</span>
+                        <span class="font-medium">${analysis.functions.length}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600">Variables:</span>
+                        <span class="font-medium">${analysis.variables.length}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600">Complexity:</span>
+                        <span class="font-medium text-${analysis.complexity === 'Low' ? 'green' : analysis.complexity === 'Medium' ? 'yellow' : 'red'}-600">${analysis.complexity}</span>
+                    </div>
+                </div>
+            `;
+
+            // Update error results
+            if (errors.length > 0) {
+                errorResults.innerHTML = errors.map(error => `
+                    <div class="error-highlight p-3 rounded-lg">
+                        <div class="text-red-800 font-medium text-sm">Line ${error.line}</div>
+                        <div class="text-red-700 text-sm">${error.message}</div>
+                        <div class="text-red-600 text-xs font-mono mt-1">${error.code}</div>
+                    </div>
+                `).join('');
+            } else {
+                errorResults.innerHTML = '<div class="success-highlight p-3 rounded-lg"><div class="text-green-700 text-sm">✓ No errors detected</div></div>';
+            }
+
+            // Update debugging suggestions
+            debugSuggestions.innerHTML = suggestions.map(suggestion => `
+                <div class="bg-${suggestion.type === 'error' ? 'red' : suggestion.type === 'improvement' ? 'blue' : 'yellow'}-50 border border-${suggestion.type === 'error' ? 'red' : suggestion.type === 'improvement' ? 'blue' : 'yellow'}-200 rounded-lg p-3">
+                    <div class="text-${suggestion.type === 'error' ? 'red' : suggestion.type === 'improvement' ? 'blue' : 'yellow'}-800 font-medium text-sm">${suggestion.title}</div>
+                    <div class="text-${suggestion.type === 'error' ? 'red' : suggestion.type === 'improvement' ? 'blue' : 'yellow'}-700 text-sm mt-1">${suggestion.message}</div>
+                </div>
+            `).join('') || '<div class="bg-green-50 border border-green-200 rounded-lg p-3"><div class="text-green-700 text-sm">✓ Your code looks good!</div></div>';
+        });
+
+        document.getElementById('generateExercise').addEventListener('click', () => {
+            const exercise = exerciseGenerator.generateRandomExercise();
+            currentExercise.innerHTML = `
+                <div class="text-purple-800 font-medium text-sm mb-2">New Challenge (${exercise.difficulty}):</div>
+                <div class="text-purple-700 text-sm mb-2">${exercise.description}</div>
+                <div class="text-purple-600 text-xs">💡 Hint: ${exercise.hint}</div>
+            `;
+            currentExercise.classList.add('slide-in');
+        });
+
+        // Auto-save functionality
+        let saveTimeout;
+        codeEditor.addEventListener('input', () => {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                // Simulate auto-save
+                console.log('Code auto-saved');
+            }, 2000);
+        });
+
+        // Initial analysis
+        document.getElementById('analyzeCode').click();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e58100c430a7e7',t:'MTc1Nzc0NDA2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
